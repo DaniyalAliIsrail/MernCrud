@@ -1,0 +1,54 @@
+.parentDiv {
+    max-width: 400px;
+    margin: 0px auto;
+    margin-top: 100px !important;
+    padding: 30px;
+    background-color: #41a4d6;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.parentDiv input {
+    width: calc(100% - 16px);
+    padding: 12px;
+    margin: 10px auto !important;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.parentDiv input:focus {
+    border-color: #0a1d22;
+}
+
+.parentDiv button {
+    width: 98%;
+    padding: 12px;
+    border-color: #0b191d;
+    color: #fff;
+    border: none;
+    margin: 10px auto;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.parentDiv button:hover {
+    border-color: #4c99af;
+ 
+}
+
+.parentDiv a {
+    display: block;
+    margin: 10px auto;
+    text-align: center;
+    color: #4c99af;
+    transition: all ease-in-out 0.3s;
+    text-decoration: none;
+}
+
+.parentDiv a:hover {
+    color: #1a4c53;
+}
