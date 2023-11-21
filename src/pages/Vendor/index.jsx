@@ -3,14 +3,60 @@ import "./vendor.modular.css"
 import axios from 'axios'
 import BASE_URL from '../../config';
 import BasicModal from '../Utils/Modals';
+import { Box, Button, Modal, TextField } from '@mui/material';
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 
 const Vendor = () => {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
-  //!Modal state:
-  
+  const [modalName, setModalName] = useState("");
+  const [modalCategory, setmodalCategory] = useState("");
+  const [modalDesc, setmodalDesc] = useState("");
+  const [editId, setEditId] = useState("")
+  // mui open and close state
+  const [open, setOpen] = useState(false);
+  const handleClose = () => setOpen(false);
+
+  // obj to send may id bhy jae ga...
+  //modal open hoda is fun kay kay andr hamnay setOpen(true) kardeya hya 
+  const handleOpen = (e) => {
+    // console.log(e.target.parentNode.parentNode.children[0].children[0].innerText)
+    setModalName(e.target.parentNode.parentNode.children[0].innerText);
+    console.log(modalName);
+    setmodalDesc(e.target.parentNode.parentNode.children[2].innerText);
+    console.log(e.target.parentNode.parentNode.children[2].innerText);
+    setmodalCategory(e.target.parentNode.parentNode.children[1].innerText)
+    console.log(modalDesc);
+    setEditId(e.target.id)
+    console.log(editId);
+    setOpen(true);
+
+  }
+  const handelModalSubmit =async ()=>{
+  console.log("chal gya func");
+  const objToSend = {
+    editId,
+    modalName,
+    modalCategory,
+    modalDesc
+  };
+  console.log(objToSend);
+  }
+
 
   const [userData, setUserData] = useState([]);
   // console.log(userData);
@@ -18,23 +64,12 @@ const Vendor = () => {
     const res = await axios.get(`${BASE_URL}/allpost`)
     // console.log(res.data.allData);
     setUserData(res.data.allData)
+    // console.log(res.data.allData)
   }
   useEffect(() => {
     fetchAllUser()
   }, [])
 
-
-  // Open the modal and set the selected item for editing
-  // const openModal = (item) => {
-  //   setSelectedItem(item);
-  //   setIsModalOpen(true);
-  // };
-
-  // // Close the modal
-  // const closeModal = () => {
-  //   setSelectedItem(null);
-  //   setIsModalOpen(false);
-  // };
 
   const handleSubmit = async (e) => {
     try {
@@ -64,7 +99,7 @@ const Vendor = () => {
       console.log(error);
     }
   }
-
+ 
   return (
     <>
       <div className='admin-heading'>Vendor screen</div>
@@ -113,7 +148,7 @@ const Vendor = () => {
                 </p>
                 <div className="actions">
 
-                  <a  className="read" >
+                  <a id={item._id} className="read" onClick={handleOpen} >
                     Edit
                   </a>
 
@@ -130,7 +165,21 @@ const Vendor = () => {
       </div>
 
       <div>
-      <BasicModal />
+        {/* <BasicModal /> */}
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <TextField id="standard-basic" value={modalName} onChange={(e) => setModalName(e.target.value)} label="Standard" variant="standard" />
+            <TextField id="standard-basic"  value={modalCategory} onChange={(e) => setmodalCategory(e.target.value)} label="Standard" variant="standard" />
+            <TextField id="standard-basic" value={modalDesc}  onChange={(e) => setmodalDesc(e.target.value)} label="Standard" variant="standard" />
+            <Button onClick={handelModalSubmit} >Submit</Button>
+          </Box>
+        </Modal>
+
       </div>
     </>
   )
