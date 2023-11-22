@@ -19,57 +19,70 @@ const style = {
 
 
 const Vendor = () => {
-
+  //all datea are save in UserData state and run map fun to display screen
+  const [userData, setUserData] = useState([]); 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  // modalName modalCategory modalDesc editId all state are use for update functionality  
   const [modalName, setModalName] = useState("");
   const [modalCategory, setmodalCategory] = useState("");
   const [modalDesc, setmodalDesc] = useState("");
   const [editId, setEditId] = useState("")
   // mui open and close state
   const [open, setOpen] = useState(false);
-  const handleClose = () => setOpen(false);
 
+  //! ************************Update-Functionality***************************
   // obj to send may id bhy jae ga...
   //modal open hoda is fun kay kay andr hamnay setOpen(true) kardeya hya 
+  //!**************************  Modal-open function    *********************** 
   const handleOpen = (e) => {
-    // console.log(e.target.parentNode.parentNode.children[0].children[0].innerText)
+    setOpen(true); 
     setModalName(e.target.parentNode.parentNode.children[0].innerText);
-    console.log(modalName);
+    // console.log(modalName);
     setmodalDesc(e.target.parentNode.parentNode.children[2].innerText);
     console.log(e.target.parentNode.parentNode.children[2].innerText);
     setmodalCategory(e.target.parentNode.parentNode.children[1].innerText)
-    console.log(modalDesc);
+    // console.log(modalDesc);
     setEditId(e.target.id)
-    console.log(editId);
-    setOpen(true);
+    // console.log(editId);
 
   }
-  const handelModalSubmit =async ()=>{
-  console.log("chal gya func");
-  const objToSend = {
-    editId,
-    modalName,
-    modalCategory,
-    modalDesc
+  //!**********  Modal-CLosed function and send updatedata from database   ******************
+  
+  const handleClose = async () => {
+    try {
+      const objToSend = {
+        title: modalName,
+        category: modalCategory,
+        description: modalDesc,
+      };
+      console.log(objToSend);
+      const res = await axios.put(`${BASE_URL}/updatepost/${editId}`, objToSend);
+      if (res && res.data) {
+        console.log(res.data);
+      } else {
+        console.error('Invalid response structure:', res);
+      }
+      fetchAllUser()
+      setOpen(false);
+    } catch (error) {
+      console.error('Error updating data:', error);
+      setOpen(false);
+    }
   };
-  console.log(objToSend);
-  }
 
-
-  const [userData, setUserData] = useState([]);
-  // console.log(userData);
+  // ****************** GET all date form database  ***********    
   const fetchAllUser = async () => {
     const res = await axios.get(`${BASE_URL}/allpost`)
     // console.log(res.data.allData);
     setUserData(res.data.allData)
-    // console.log(res.data.allData)
   }
   useEffect(() => {
     fetchAllUser()
   }, [])
 
+  //************* input say data send krna databae opr ****** */
 
   const handleSubmit = async (e) => {
     try {
@@ -88,6 +101,8 @@ const Vendor = () => {
     }
   }
 
+  //************* DElETE FUNCTIONALITY ****** */
+
   const handleDel = async (id) => {
     try {
       const response = await axios.delete(`http://localhost:7000/api/delpost/${id}`);
@@ -99,7 +114,7 @@ const Vendor = () => {
       console.log(error);
     }
   }
- 
+
   return (
     <>
       <div className='admin-heading'>Vendor screen</div>
@@ -131,7 +146,6 @@ const Vendor = () => {
       </div>
 
       {/* card-section */}
-
       <div className='card-parent'>
         {
           userData.map((item, i) => {
@@ -147,15 +161,12 @@ const Vendor = () => {
                   {item.description}
                 </p>
                 <div className="actions">
-
                   <a id={item._id} className="read" onClick={handleOpen} >
                     Edit
                   </a>
-
                   <a onClick={() => handleDel(item._id)} className="mark-as-read" >
                     Delete
                   </a>
-
                 </div>
               </div>
             )
@@ -173,10 +184,10 @@ const Vendor = () => {
           aria-describedby="modal-modal-description"
         >
           <Box sx={style}>
-            <TextField id="standard-basic" value={modalName} onChange={(e) => setModalName(e.target.value)} label="Standard" variant="standard" />
-            <TextField id="standard-basic"  value={modalCategory} onChange={(e) => setmodalCategory(e.target.value)} label="Standard" variant="standard" />
-            <TextField id="standard-basic" value={modalDesc}  onChange={(e) => setmodalDesc(e.target.value)} label="Standard" variant="standard" />
-            <Button onClick={handelModalSubmit} >Submit</Button>
+            <TextField id="standard-basic" value={modalName} onChange={(e) => setModalName(e.target.value)} label="Title" variant="standard" />
+            <TextField id="standard-basic" value={modalCategory} onChange={(e) => setmodalCategory(e.target.value)} label="Category" variant="standard" />
+            <TextField id="standard-basic" value={modalDesc} onChange={(e) => setmodalDesc(e.target.value)} label="Description" variant="standard" />
+            <Button onClick={handleClose} >Submit</Button>
           </Box>
         </Modal>
 
