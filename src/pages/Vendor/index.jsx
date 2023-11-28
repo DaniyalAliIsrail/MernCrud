@@ -20,7 +20,7 @@ const style = {
 
 const Vendor = () => {
   //all datea are save in UserData state and run map fun to display screen
-  const [userData, setUserData] = useState([]); 
+  const [userData, setUserData] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -31,25 +31,26 @@ const Vendor = () => {
   const [editId, setEditId] = useState("")
   // mui open and close state
   const [open, setOpen] = useState(false);
+  //frontend say file bhja hay abhy srf to is state may save karwaya hu
+  const [imageFile, setImageFile] = useState(null)
+  const [imageUrl, setImageUrl] = useState("")
 
   //! ************************Update-Functionality***************************
   // obj to send may id bhy jae ga...
   //modal open hoda is fun kay kay andr hamnay setOpen(true) kardeya hya 
   //!**************************  Modal-open function    *********************** 
-  const handleOpen = (e) => {
-    setOpen(true); 
-    setModalName(e.target.parentNode.parentNode.children[0].innerText);
-    // console.log(modalName);
-    setmodalDesc(e.target.parentNode.parentNode.children[2].innerText);
-    console.log(e.target.parentNode.parentNode.children[2].innerText);
-    setmodalCategory(e.target.parentNode.parentNode.children[1].innerText)
-    // console.log(modalDesc);
-    setEditId(e.target.id)
+  const handleOpen = (item) => {
+    setOpen(true);
+    setModalName(item.title)
+    setmodalDesc(item.description)
+    setmodalCategory(item.category)
+    console.log(item);
+    setEditId(item._id)
     // console.log(editId);
 
   }
-  //!**********  Modal-CLosed function and send updatedata from database   ******************
-  
+  //!******  Modal-CLosed function and send updatedata from database   *******
+
   const handleClose = async () => {
     try {
       const objToSend = {
@@ -72,7 +73,43 @@ const Vendor = () => {
     }
   };
 
-  // ****************** GET all date form database  ***********    
+  //************ Handle Image Change   ************ */
+
+  const handleImageChange = (e) => {
+    // console.log(e.target.files[0]);
+    setImageFile(e.target.files[0])
+    return
+  }
+
+  const handleImageUpload = async () => {
+    try {
+      if (!imageFile) {
+        console.log("please select an image");
+        return
+      }
+      const formData = new FormData();
+      formData.append("image", imageFile)
+
+      const response = await axios.post(`http://localhost:7000/api/uploadimage`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data
+      );
+      if (response.status === 200) {
+        setImageUrl(response.data.data.secure_url)
+      } else {
+        console.log("Image upload failed:", response.data.message);
+        setImageUrl(null)
+      }
+    } catch (err) {
+      console.error("Error uploading image:", err.message);
+      setImageUrl(null)
+    }
+  }
+
+  // ********** GET all date form database  ***********    
   const fetchAllUser = async () => {
     const res = await axios.get(`${BASE_URL}/allpost`)
     // console.log(res.data.allData);
@@ -81,17 +118,35 @@ const Vendor = () => {
   useEffect(() => {
     fetchAllUser()
   }, [])
-
-  //************* input say data send krna databae opr ****** */
+  //************* input say data send krna database pr** */
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
+
+      if (!imageFile) {
+        console.log("Please select an image");
+        alert("Please select an image")
+        return;
+      }
+      await handleImageUpload();
+      console.log(imageUrl)
+
+      if (!title ||
+        !description ||
+        !category ||
+        !imageUrl) {
+        alert("please fill all the filled")
+        return
+      }
+
       const objToSend = {
         title,
         description,
         category,
+        imageUrl,
       };
+
       const response = await axios.post(`${BASE_URL}/createpost`, objToSend);
       console.log(response.data);
       fetchAllUser()
@@ -100,6 +155,7 @@ const Vendor = () => {
       console.log(error);
     }
   }
+
 
   //************* DElETE FUNCTIONALITY ****** */
 
@@ -115,13 +171,13 @@ const Vendor = () => {
     }
   }
 
+
   return (
     <>
       <div className='admin-heading'>Vendor screen</div>
       <div>
         <form onSubmit={handleSubmit} >
-          <div className='admin-parent' >
-
+          <div className='admin-parent'>
             <input
               type="text"
               placeholder="Enter Title"
@@ -139,19 +195,54 @@ const Vendor = () => {
               <option value="Education">Education</option>
               <option value="Science">Science</option>
             </select>
+
+            <input type="file" accept='image/*' onChange={handleImageChange} />
             {/* <Link to="/login">{"Already Have An Account? "}</Link> */}
             <button className='add-data' type="submit">Add Data</button>
           </div>
         </form>
       </div>
 
-      {/* card-section */}
+      {/* cards--temp */}
+      {/* <div className="card">
+      {userData.map((item,i)=>(
+        <div key={i}>
+        <div>
+          <img className='image' src={item.imageUrl}></img>
+        </div>
+        <div className="content">
+          <a href="#">
+            <span className="title">
+             {item.title}
+            </span>
+          </a>
+          <p className="desc">
+           {item.description}
+          </p>
+          <div className="actions">
+                  <a id={item._id} className="read" onClick={handleOpen} >
+                    Edit
+                  </a>
+                  <a onClick={() => handleDel(item._id)} className="mark-as-read" >
+                    Delete
+                  </a>
+                </div>
+        </div>
+       </div>
+      ))}
+</div> */}
+
+      {/* card-section  */}
       <div className='card-parent'>
         {
           userData.map((item, i) => {
             return (
               <div key={i} className="card">
+                <div>
+                  <img style={{ width: 150 }} src={item.imageUrl}></img>
+                </div>
                 <div className="header">
+
                   <p className="alert">{item.title}</p>
                 </div>
                 <div>
@@ -161,7 +252,7 @@ const Vendor = () => {
                   {item.description}
                 </p>
                 <div className="actions">
-                  <a id={item._id} className="read" onClick={handleOpen} >
+                  <a  className="read" onClick={() => handleOpen(item)} >
                     Edit
                   </a>
                   <a onClick={() => handleDel(item._id)} className="mark-as-read" >
